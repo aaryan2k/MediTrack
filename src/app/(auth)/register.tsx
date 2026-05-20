@@ -1,0 +1,121 @@
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { setDoc, doc } from "firebase/firestore";
+import { auth, db } from "../../../firebase/config";
+import { useRouter } from "expo-router";
+
+export default function Register() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fname, setFname] = useState("");
+  const [lname, setLname] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (!fname || !email || !password) {
+      Alert.alert("Missing fields", "Please fill out first name, email, and password.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "Users", user.uid), {
+        email: user.email,
+        firstName: fname.trim(),
+        lastName: lname.trim(),
+      });
+
+      Alert.alert("Success", "Registered successfully.");
+      router.replace("../(tabs)");  
+    } catch (error: any) {
+      Alert.alert("Registration failed", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-white dark:bg-black justify-center px-6"
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingHorizontal: 24 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="bg-gray-100 dark:bg-gray-800 p-6 border border-accent rounded-lg shadow">
+          <Text className="text-4xl font-bold text-black dark:text-gray-100 mb-6">
+            Register
+          </Text>
+
+          <Text className="text-black dark:text-gray-300 mb-2">First name</Text>
+          <TextInput
+            value={fname}
+            onChangeText={setFname}
+            placeholder="John/Jane"
+            autoCapitalize="words"
+            className="border border-accent rounded-lg px-4 py-3 mb-4 text-black dark:text-white bg-gray-200 dark:bg-gray-800"
+          />
+
+          <Text className="text-black dark:text-gray-300 mb-2">Last name</Text>
+          <TextInput
+            value={lname}
+            onChangeText={setLname}
+            placeholder="Doe"
+            autoCapitalize="words"
+            className="border border-accent rounded-lg px-4 py-3 mb-4 text-black dark:text-white bg-gray-200 dark:bg-gray-800"
+          />
+
+          <Text className="text-black dark:text-gray-300 mb-2">Email address</Text>
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            placeholder="example@gmail.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            className="border border-accent rounded-lg px-4 py-3 mb-4 text-black dark:text-white bg-gray-200 dark:bg-gray-800"
+          />
+
+          <Text className="text-black dark:text-gray-300 mb-2">Password</Text>
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Password@123"
+            secureTextEntry
+            autoCapitalize="none"
+            className="border border-accent rounded-lg px-4 py-3 mb-6 text-black dark:text-white bg-gray-200 dark:bg-gray-800"
+          />
+
+          <Pressable
+            onPress={handleRegister}
+            className="bg-accent rounded-lg py-4 items-center active:opacity-80"
+          >
+            <Text className="text-white text-lg font-semibold">
+              {loading ? "Creating Account..." : "Create Account"}
+            </Text>
+          </Pressable>
+
+          <Pressable onPress={() => router.push("/login")} className="mt-4">
+            <Text className="text-black dark:text-gray-300 text-right">
+              Already registered? <Text className="text-accent">Login</Text>
+            </Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
