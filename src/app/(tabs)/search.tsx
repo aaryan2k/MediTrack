@@ -1,18 +1,22 @@
-import {View, Text, Image} from 'react-native';
-import React from 'react';
-import {icons} from "../../../constants/icons";
+import { View } from 'react-native';
+import SearchBar from '../../../components/SearchBar';
+import { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Search = () => {
+    const [searchQuery, setSearchQuery] = useState("");
+
     return (
-        <View className="bg-primary flex-1 px-10">
-            <View className="flex justify-center items-center flex-1 flex-col gap-5">
-                <Image
-                    source={icons.search}
-                    className="size-10"
-                    tintColor="#fff"
-                />
-                <Text className="text-gray-500 text-base">Search</Text>
-            </View>
+        <View className="flex-1 items-center bg-white dark:bg-black">
+            <SafeAreaView className="w-full" >
+                <View className="my-5 pt-5">
+                    <SearchBar
+                        placeholder="Search medications..."
+                        value={searchQuery}
+                        onChangeText={(text: string) => setSearchQuery(text)}
+                    />
+                </View>
+            </SafeAreaView>
         </View>
     )
 }
