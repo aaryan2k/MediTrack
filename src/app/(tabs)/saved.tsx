@@ -1,6 +1,6 @@
-import {View, Text, Image, useColorScheme} from 'react-native';
+import {View, Text, useColorScheme} from 'react-native';
 import React from 'react';
-import {icons} from "../../../constants/icons";
+import { Ionicons } from "@expo/vector-icons";
 
 const Saved = () => {
     const scheme = useColorScheme();
@@ -9,10 +9,10 @@ const Saved = () => {
     return (
         <View className="flex-1 bg-white dark:bg-black">
             <View className="flex justify-center items-center flex-1 flex-col gap-5">
-                <Image
-                    source={icons.save}
-                    className="size-10"
-                    tintColor={tint}
+                <Ionicons
+                    name="bookmark-outline"
+                    size={40}
+                    color={tint}
                 />
                 <Text className="dark:text-white text-black text-base">Saved</Text>
             </View>

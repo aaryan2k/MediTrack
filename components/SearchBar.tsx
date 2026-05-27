@@ -1,5 +1,5 @@
-import {View, Image, TextInput} from 'react-native';;
-import {icons} from "../constants/icons";
+import {View, TextInput} from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
 
 interface Props {
     placeholder: string;
@@ -11,7 +11,7 @@ interface Props {
 const SearchBar = ({onPress, placeholder, value, onChangeText}: Props) => {
     return (
         <View className="flex-row items-center bg-gray-200 dark:bg-gray-800 rounded-full px-5 py-4">
-            <Image source={icons.search} className="size-5" resizeMode="contain" tintColor="#2FA3DC"/>
+            <Ionicons name="search" size={17} color="#2FA3DC"/>
             <TextInput
                 onPress={onPress}
                 placeholder={placeholder}
