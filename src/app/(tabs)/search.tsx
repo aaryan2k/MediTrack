@@ -1,25 +1,18 @@
-import { View, Text, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, Alert } from 'react-native';
 import SearchBar from '../../../components/SearchBar';
 import { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Collapsible } from '../../../components/Collapsible';
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from '../../../firebase/config';
+import { auth, db } from '../../../firebase/config';
 import useFetch from '../../../services/useFetch';
 import  { fetchRX } from '../../../services/api';
+import { getDocs, collection, doc, deleteDoc, setDoc } from 'firebase/firestore';
 
 
-const Search = () => {
+export default function Search() {
     const [searchQuery, setSearchQuery] = useState("");
     const [savedIds, setSavedIds] = useState<string[]>([]);
-    const [user, setUser] = useState<any>(undefined);
-    
-      useEffect(() => {
-        const unsub = onAuthStateChanged(auth, (firebaseUser) => {
-          setUser(firebaseUser ?? null);
-        });
-        return unsub;
-      }, []);
+    const user = auth.currentUser;
 
     const { data: medicationData,
         loading: medicationsLoading,
@@ -46,11 +39,41 @@ const Search = () => {
             (group: any) => group?.conceptProperties ?? []
         ) ?? [];
 
-    const handleSave = (medicine: any) => {
-        if (!savedIds.includes(medicine.rxcui)) {
-            setSavedIds([...savedIds, medicine.rxcui]);
-        } else {
-            setSavedIds(savedIds.filter((id) => id !== medicine.rxcui));
+    useEffect(() => {
+        const fetchSavedMedications = async () => {
+            if (!user) return;
+
+            try {
+                const medsRef = collection(db, "Users", user.uid, "medications");
+                const snapshot = await getDocs(medsRef);
+
+                const ids = snapshot.docs.map((doc) => doc.id); 
+                setSavedIds(ids);
+            } catch (error) {
+                console.error("Error fetching medications:", error);
+            }
+        };
+
+        fetchSavedMedications();
+    }, [user]);
+
+    const handleSave = async (medicine: any) => {
+        if (!user) return;
+
+        const medRef = doc(db, "Users", user.uid, "medications", medicine.rxcui);
+        try {
+           if (savedIds.includes(medicine.rxcui)) {
+                await deleteDoc(medRef);
+                setSavedIds((prev) => prev.filter((id) => id !== medicine.rxcui));
+            } else {
+                await setDoc(medRef, {
+                    name: medicine.synonym || medicine.name,
+                    rxnormId: medicine.rxcui,
+                });
+            setSavedIds((prev) => [...prev, medicine.rxcui]);
+            }
+        } catch (error) {
+            Alert.alert("Error", "Failed to save medication. Please try again.");
         }
     }
 
@@ -107,7 +130,7 @@ const Search = () => {
                             !medicationsLoading && !medicationsError ? (
                                 <View className="mt-10 px-5 ">
                                     <Text className="text-center text-gray-500">
-                                        {searchQuery.trim() ? 'No medications found' : 'Search for a medication'}
+                                        {searchQuery.trim() ? 'No medications found' : ''}
                                     </Text>
                                 </View>
                             ) : null
@@ -117,5 +140,3 @@ const Search = () => {
         </View>
     )
 }
-
-export default Search;

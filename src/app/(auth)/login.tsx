@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Pressable, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase/config";
 import { useRouter } from "expo-router";
@@ -60,23 +60,23 @@ export default function Login() {
             className="border border-accent rounded-lg px-4 py-3 mb-6 text-black dark:text-white bg-gray-200 dark:bg-gray-800"
             />
 
-            <Pressable
+            <TouchableOpacity
                 onPress={handleLogin}
                 className="bg-accent rounded-lg py-4 items-center active:opacity-80"
             >
-            <Text className="text-white text-lg font-semibold">
-                {loading ? "Logging in..." : "Submit"}
-            </Text>
-            </Pressable>
+              <Text className="text-black dark:text-white text-lg font-semibold">
+                  {loading ? "Logging in..." : "Submit"}
+              </Text>
+            </TouchableOpacity>
 
-            <Pressable 
+            <TouchableOpacity 
                 onPress={() => router.push("/register")} 
                 className="mt-4">
-            <Text className="text-black dark:text-gray-300 text-right">
-                New user? <Text className="text-accent">Register Here</Text>
-            </Text>
-            </Pressable>
-            </View>
+              <Text className="text-black dark:text-white text-right">
+                  New user? <Text className="text-accent">Register Here</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
     </KeyboardAvoidingView>
   );

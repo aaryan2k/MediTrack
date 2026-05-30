@@ -1,47 +1,65 @@
-import { View, Text, Image, TouchableOpacity, Alert, useColorScheme } from 'react-native';
-import React from 'react';
+import { View, Text, TouchableOpacity, useColorScheme, ScrollView } from 'react-native';
+import React, { use } from 'react';
 import { Ionicons } from "@expo/vector-icons";
-import { router } from 'expo-router';
-import { auth } from '../../../firebase/config';
+import { useRouter } from "expo-router";
+import { auth, db } from '../../../firebase/config';
+import { useState, useEffect } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
 
-const Profile = () => {
+
+export default function Profile() {
+    const router = useRouter();
     const scheme = useColorScheme();
     const tint = scheme === 'dark' ? '#fff' : '#000';
-    const handleGoBack = async () => {
-        try {
-            await auth.signOut();
-            router.push("/login");
-        } catch (error) {
-            console.error("Error signing out:", error);
-            Alert.alert("Error", "Failed to sign out.");
+    const [fname, setFname] = useState("");
+    const [lname, setLname] = useState("");
+    const [email, setEmail] = useState("");
+
+    const user = auth.currentUser;
+    
+    useEffect(() => {
+        const loadUser = async () => {
+            if (!user) return;
+            const userRef = doc(db, "Users", user.uid); 
+            const docSnap = await getDoc(userRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                setFname(data.firstName || "");
+                setLname(data.lastName || "");
+                setEmail(data.email || "");
+            } else {
+                console.log("No such document!");
+            }
         }
-        
-    }
+
+        loadUser();
+    }, [user])
+
 
     return (
-        <View className="flex-1 justify-center items-center bg-white dark:bg-black">
-            <View className="flex justify-center items-center flex-1 flex-col gap-5">
-                <Ionicons
-                    name="person-outline"
-                    size={40}
-                    color={tint}
-                />
-                <Text className="dark:text-white text-black text-base">Profile</Text>
-                <TouchableOpacity
-                    className="px-5 mx-10 bg-accent rounded-lg py-3.5 flex flex-row items-center justify-center z-50"
-                    onPress={handleGoBack}
+        <View className="flex-1 bg-white dark:bg-black">
+            <View className="flex-1">
+                <View className="w-full h-28 bg-accent">
+                    <TouchableOpacity onPress={() => router.push("../settings")}>
+                        <Ionicons
+                            name="settings-outline"
+                            size={25}
+                            color={tint}
+                            className="absolute right-5 top-5 mt-12"
+                        />
+                    </TouchableOpacity>
+                </View>
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1, alignItems: "center", paddingHorizontal: 12 }}
                 >
-                    <Ionicons
-                        name="arrow-back"
-                        className="mr-1 mt-0.5"
-                        color={tint}
-                        size={15}
-                    />
-                    <Text className="dark:text-white text-black font-semibold text-base">Sign Out</Text>
-            </TouchableOpacity>
+                    <View 
+                        className="bg-gray-100 dark:bg-gray-800 p-6 border border-accent rounded-xl 
+                        shadow w-[90%] h-40 mt-16 gap-y-2 items-center justify-center">
+                        <Text className="text-2xl font-bold text-black dark:text-white">Name: {fname} {lname}</Text>
+                        <Text className="text-gray-600 dark:text-gray-300 mt-2">Email: {email}</Text>
+                    </View>
+                </ScrollView>
             </View>
         </View>
     )
 }
-
-export default Profile;
