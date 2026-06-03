@@ -10,14 +10,27 @@ export default function Settings() {
   const scheme = useColorScheme();
   const tint = scheme === 'dark' ? '#fff' : '#000';
 
-  const handleGoBack = async () => {
-    try {
-      await auth.signOut();
-      router.push("/login");
-    } catch (error) {
-        console.error("Error signing out:", error);
-        Alert.alert("Error", "Failed to sign out.");
-    }  
+  const handleSignOut= async () => {
+     Alert.alert(
+      "Sign Out",
+      "Are you sure you want to sign out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign Out",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await auth.signOut();
+              router.push("/login");
+            } catch (error) {
+              console.error("Error signing out:", error);
+              Alert.alert("Error", "Failed to sign out.");
+            }  
+          }
+        }
+      ]
+    );
   }
 
   const deleteAccount = async () => {
@@ -124,7 +137,7 @@ export default function Settings() {
           <TouchableOpacity
             className="bg-accent items-center justify-center rounded-xl py-3.5 flex 
             flex-row z-50 w-[90%] h-32 border border-black dark:border-white shadow-sm dark:shadow-white"
-            onPress={handleGoBack}
+            onPress={handleSignOut}
           >
             <Ionicons
                 name="log-out-outline"
@@ -150,7 +163,7 @@ export default function Settings() {
       </ScrollView>
         <TouchableOpacity
             className="absolute bottom-5 left-0 right-0 mx-5 bg-accent rounded-lg py-3.5 flex flex-row items-center justify-center z-50"
-            onPress={router.back}
+            onPress={() => router.push("/profile")}
           >
             <Ionicons
               name="arrow-back"

@@ -81,9 +81,14 @@ const Saved = () => {
                                 {
                                     !loading && !errorMessage
                                     && medications.length > 0 && (
-                                    <Text className="text-2xl text-white font-bold pb-4 mb-2">
-                                        My Medications:
-                                    </Text>
+                                    <View className="pb-4 mb-2">
+                                        <Text className="text-2xl text-black dark:text-white font-bold mb-2">
+                                            My Medications:
+                                        </Text>
+                                        <Text className="text-sm text-accent font-bold">
+                                            Tap any medication to learn more & set reminders!
+                                        </Text>
+                                    </View>
                                 )}
 
                             </>

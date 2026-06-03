@@ -116,7 +116,7 @@ function ProfileEdit() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() => router.replace("/profile")}
+                    onPress={() => router.replace("/settings")}
                     className="bg-accent rounded-lg py-4 items-center active:opacity-80 mt-4"
                 >
                     <Text className="text-black dark:text-white text-lg font-semibold">Cancel</Text>
