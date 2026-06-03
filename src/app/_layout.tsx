@@ -13,6 +13,12 @@ export default function RootLayout() {
       <Stack.Screen 
         name="(global)"
       />
+      <Stack.Screen 
+        name="meds/[id]"
+      />
+      <Stack.Screen 
+        name="reminder/[id]"
+      />
     </Stack>
   );
 }

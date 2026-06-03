@@ -22,9 +22,32 @@ export default function Register() {
   const [lname, setLname] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const passwordRegex = /^(?=.*[A-Z])(?=.*[@#$%^&!]).{8,}$/;
+
+    const isValidEmail = (email: string) => {
+      return emailRegex.test(email);
+    };
+
+    const isValidPassword = (password: string) => {
+      return passwordRegex.test(password);
+    };
+
   const handleRegister = async () => {
     if (!fname || !email || !password) {
       Alert.alert("Missing fields", "Please fill out first name, email, and password.");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      Alert.alert("Invalid email", "Please enter a valid email address.");
+      return;
+    }
+
+    if (!isValidPassword(password)) {
+      Alert.alert("Invalid password",
+         "Please enter a password 8 or more characters long with at least one uppercase letter and one special character (!, @, #, $, %, ^, &)."
+      );
       return;
     }
 
