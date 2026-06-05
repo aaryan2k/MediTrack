@@ -1,5 +1,4 @@
 import { View, Text, TouchableOpacity, useColorScheme, ScrollView } from 'react-native';
-import React, { use } from 'react';
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { auth, db } from '../../../firebase/config';

@@ -1,13 +1,17 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView, useColorScheme } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase/config";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Login() {
   const router = useRouter();
+  const scheme = useColorScheme();
+  const tint = scheme === 'dark' ? '#fff' : '#000';
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -52,22 +56,31 @@ export default function Login() {
             />
 
             <Text className="text-black dark:text-gray-300 mb-2">Password</Text>
-            <TextInput
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Password@123"
-            secureTextEntry
-            className="border border-accent rounded-lg px-4 py-3 mb-6 text-black dark:text-white bg-gray-200 dark:bg-gray-800"
-            />
+            <View>
+              <TextInput
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Password@123"
+              secureTextEntry={!showPassword}
+              className="border border-accent rounded-lg px-4 py-3 mb-6 text-black dark:text-white bg-gray-200 dark:bg-gray-800"
+              />
+              <TouchableOpacity
+                className="absolute right-3 top-3"
+                activeOpacity={0.5}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Ionicons name={showPassword ? "eye-off" : "eye"} size={24} color={tint} />
+              </TouchableOpacity>
+            </View>
+              <TouchableOpacity
+                  onPress={handleLogin}
+                  className="bg-accent rounded-lg py-4 items-center active:opacity-80"
+              >
+                <Text className="text-black dark:text-white text-lg font-semibold">
+                    {loading ? "Logging in..." : "Submit"}
+                </Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-                onPress={handleLogin}
-                className="bg-accent rounded-lg py-4 items-center active:opacity-80"
-            >
-              <Text className="text-black dark:text-white text-lg font-semibold">
-                  {loading ? "Logging in..." : "Submit"}
-              </Text>
-            </TouchableOpacity>
 
             <TouchableOpacity 
                 onPress={() => router.push("/register")} 

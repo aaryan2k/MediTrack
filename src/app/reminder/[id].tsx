@@ -11,7 +11,7 @@ const Reminder = () => {
         <View className="flex-1 bg-white dark:bg-black">
             <View className="flex justify-center items-center flex-1 flex-col gap-5">
                 <Ionicons
-                    name="pulse-outline"
+                    name="alarm"
                     size={40}
                     color={tint}
                 />

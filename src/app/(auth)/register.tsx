@@ -3,23 +3,28 @@ import {
   View,
   Text,
   TextInput,
-  Pressable,
+  TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  useColorScheme,
 } from "react-native";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { setDoc, doc } from "firebase/firestore";
 import { auth, db } from "../../../firebase/config";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Register() {
   const router = useRouter();
+  const scheme = useColorScheme();
+  const tint = scheme === 'dark' ? '#fff' : '#000';
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fname, setFname] = useState("");
   const [lname, setLname] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -112,31 +117,38 @@ export default function Register() {
             autoCapitalize="none"
             className="border border-accent rounded-lg px-4 py-3 mb-4 text-black dark:text-white bg-gray-200 dark:bg-gray-800"
           />
-
-          <Text className="text-black dark:text-gray-300 mb-2">Password</Text>
-          <TextInput
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Password@123"
-            secureTextEntry
-            autoCapitalize="none"
-            className="border border-accent rounded-lg px-4 py-3 mb-6 text-black dark:text-white bg-gray-200 dark:bg-gray-800"
-          />
-
-          <Pressable
+          <View>
+            <Text className="text-black dark:text-gray-300 mb-2">Password</Text>
+            <TextInput
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Password@123"
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              className="border border-accent rounded-lg px-4 py-3 mb-6 text-black dark:text-white bg-gray-200 dark:bg-gray-800"
+            />
+            <TouchableOpacity
+                className="absolute right-3 top-[2.7rem]"
+                activeOpacity={0.5}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Ionicons name={showPassword ? "eye-off" : "eye"} size={24} color={tint} />
+              </TouchableOpacity>
+          </View>
+          <TouchableOpacity
             onPress={handleRegister}
             className="bg-accent rounded-lg py-4 items-center active:opacity-80"
           >
             <Text className="text-white text-lg font-semibold">
               {loading ? "Creating Account..." : "Create Account"}
             </Text>
-          </Pressable>
+          </TouchableOpacity>
 
-          <Pressable onPress={() => router.push("/login")} className="mt-4">
+          <TouchableOpacity onPress={() => router.push("/login")} className="mt-4">
             <Text className="text-black dark:text-gray-300 text-right">
               Already registered? <Text className="text-accent">Login</Text>
             </Text>
-          </Pressable>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

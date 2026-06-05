@@ -62,7 +62,10 @@ export default function Search() {
 
         const medRef = doc(db, "Users", user.uid, "medications", medicine.rxcui);
         try {
-           if (savedIds.includes(medicine.rxcui)) {
+            if (savedIds.length >= 15) {
+                Alert.alert("Limit reached", "You can only save up to 15 medications.");
+                return;
+            } else if (savedIds.includes(medicine.rxcui)) {
                 await deleteDoc(medRef);
                 setSavedIds((prev) => prev.filter((id) => id !== medicine.rxcui));
             } else {
