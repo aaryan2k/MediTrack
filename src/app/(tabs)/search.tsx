@@ -7,6 +7,7 @@ import { auth, db } from '../../../firebase/config';
 import useFetch from '../../../services/useFetch';
 import  { fetchRX } from '../../../services/api';
 import { getDocs, collection, doc, deleteDoc, setDoc } from 'firebase/firestore';
+import { router } from 'expo-router';
 
 
 export default function Search() {
@@ -58,7 +59,10 @@ export default function Search() {
     }, [user]);
 
     const handleSave = async (medicine: any) => {
-        if (!user) return;
+        if (!user) {
+            router.push("/(auth)/login");
+            return;
+        }
 
         const medRef = doc(db, "Users", user.uid, "medications", medicine.rxcui);
         try {

@@ -23,7 +23,7 @@ export default function Login() {
     try {
       setLoading(true);
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      router.replace("../(tabs)");
+      router.push("../(tabs)");
     } catch (error: any) {
       Alert.alert("Login failed", error.message);
     } finally {

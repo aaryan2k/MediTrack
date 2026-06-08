@@ -52,7 +52,7 @@ function ProfileEdit() {
       });
 
       Alert.alert("Success", "Profile updated successfully!");
-      router.replace("/profile");
+      router.push("/profile");
     } catch (error: any) {
       Alert.alert("Error", error.message);
     }
@@ -116,7 +116,7 @@ function ProfileEdit() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() => router.replace("/settings")}
+                    onPress={router.back}
                     className="bg-accent rounded-lg py-4 items-center active:opacity-80 mt-4"
                 >
                     <Text className="text-black dark:text-white text-lg font-semibold">Cancel</Text>

@@ -68,7 +68,7 @@ export default function Register() {
       });
 
       Alert.alert("Success", "Registered successfully.");
-      router.replace("../(tabs)");  
+      router.push("../(tabs)");  
     } catch (error: any) {
       Alert.alert("Registration failed", error.message);
     } finally {
