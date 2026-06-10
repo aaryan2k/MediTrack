@@ -16,9 +16,13 @@ export default function RootLayout() {
       />
       <Stack.Screen 
         name="meds/[id]"
+        options={{ animation: "slide_from_left" }}
       />
       <Stack.Screen 
         name="reminder/[id]"
+      />
+      <Stack.Screen 
+        name="interactions/[id]"
       />
     </Stack>
   );

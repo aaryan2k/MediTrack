@@ -1,10 +1,14 @@
-import { View, Text, useColorScheme, TouchableOpacity, ScrollView } from 'react-native'
+import { View, Text, useColorScheme, TouchableOpacity, ActivityIndicator, FlatList} from 'react-native'
 import { Link, router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from 'react';
 import { auth, db } from '../../../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { fetchFDA } from '../../../services/api';
+
+const regex = /([A-Z][A-Za-z0-9'’\- ]+(?:, [A-Z][A-Za-z0-9'’\- ]+)*(?: and [A-Z][A-Za-z0-9'’\- ]+)?)\s*:/g;
+
 
 const Details = () => {
     const { id } = useLocalSearchParams();
@@ -12,6 +16,33 @@ const Details = () => {
     const tint = scheme === 'dark' ? '#fff' : '#000';
     const [name, setName] = useState("");
     const user = auth.currentUser;
+    const [warningData, setWarningData] = useState<null | any>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
+    
+    useEffect(() => {
+        const load = async () => {
+            try {
+                setLoading(true);
+                const data = await fetchFDA({ query: String(id) });
+                setWarningData(data);
+            } catch (e) {
+                setError(e instanceof Error ? e : new Error("Failed to load"));
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        load();
+    }, []);
+
+    const text = warningData?.results?.[0]?.warnings_and_cautions?.[0];
+    let warnings = text ? [...text.matchAll(regex)].map(match => match[1].trim()) : [];
+    if (text) {
+        warnings[0] = warnings?.[0]?.slice(25)?.trim();
+    }
+
+
 
     useEffect(() => {
         const loadData = async () => {
@@ -35,29 +66,93 @@ const Details = () => {
     return (
         <View className="flex-1 bg-white dark:bg-black">
             <SafeAreaView className="flex-1">
-                <Text className="text-black dark:text-white align-top mt-12 ml-4 font-bold text-3xl">{name}</Text>
+                <Text className="text-black dark:text-white align-top mt-12 ml-4 font-bold text-2xl">{name}</Text>
                 <View className="h-[2px] bg-gray-700 dark:bg-gray-300 mx-5 mb-5 mt-4" />
-                <ScrollView
-                    contentContainerStyle={{ 
-                        paddingBottom: 80,
-                        flexGrow: 1,
-                    }}
-                >
-                    <View className="items-end mt-3 mr-7">
-                        <TouchableOpacity 
-                            onPress={() => router.push(`/reminder/${id}`)}
-                            className="h-16 w-16 rounded-full border-2 border-black dark:border-white items-center justify-center"
-                            activeOpacity={0.7}
-                        >
-                            <Ionicons
-                                name={"alarm"}
-                                size={25}
-                                color={tint}
-                            />
-                        </TouchableOpacity>
-                        <Text className="text-black dark:text-white mt-2 text-center font-bold text-sm">Set Reminder</Text>
+                <View className="items-end mt-3 mr-7">
+                    <TouchableOpacity 
+                        onPress={() => router.push(`/reminder/${id}`)}
+                        className="h-16 w-16 rounded-full border-2 border-black dark:border-white items-center justify-center"
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons
+                            name={"alarm"}
+                            size={25}
+                            color={tint}
+                        />
+                    </TouchableOpacity>
+                    <Text className="text-black dark:text-white mt-2 text-center font-bold text-sm">Set Reminder</Text>
+                </View>
+                <View className="flex-1 pb-80 items-center"
+                    >
+                    <View 
+                        className="bg-gray-100 dark:bg-gray-800 p-6 border border-accent rounded-xl 
+                        shadow w-[90%] min-h-96 gap-y-2 mt-10 justify-center flex flex-row">
+                        <FlatList
+                            data={warnings}
+                            renderItem={({ item }) => 
+                                <Text className="text-black dark:text-white font-bold">{item}</Text>
+                            }
+                            keyExtractor={(item, index) => `${item}-${index}`}
+                            className="px-5"
+                            numColumns={1}
+                            contentContainerStyle={{
+                                paddingBottom: 20,
+                            }}
+                            ItemSeparatorComponent={() => <View className="h-4" />}
+                            ListHeaderComponent={
+                                <>
+                                    {loading && (
+                                        <ActivityIndicator size="large" className="my-3" />
+                                    )}
+                                                                        
+                                    {error && (
+                                        <Text className="text-red-500 px-5 my-3">
+                                            Error: {error.message}
+                                        </Text>
+                                    )}
+                                    
+                                    {
+                                        !loading && !error
+                                        && (
+                                        <View className="pb-4 mb-2 justify-center flex flex-row">
+                                            <Ionicons 
+                                                name="warning-outline"
+                                                size={25}
+                                                color="#ef4444"
+                                                className="mt-[0.25rem]"
+                                            />
+                                            <Text className="text-2xl font-bold text-red-500 ml-2">Warnings:</Text>
+                                        </View>
+                                    )}
+                                </>
+                            }
+                            ListEmptyComponent={
+                                !loading && !error ? (
+                                    <View className="mt-10 px-5 ">
+                                        <Text className="text-center text-gray-500">
+                                            {warnings?.length === 0 ? 'No warnings found, ask a doctor' : ''}
+                                        </Text>
+                                    </View>
+                                ) : null
+                            }
+                        />
                     </View>
-                </ScrollView>
+                    <TouchableOpacity 
+                        className="items-center mt-7"
+                        onPress={() => router.push(`../interactions/${id}`)}
+                    >
+                        <View className="bg-gray-100 dark:bg-gray-800 w-[85%] min-h-16 border border-accent rounded-lg shadow flex-row items-center px-3 py-3">
+                            <Ionicons
+                                name="information-circle-outline"
+                                color={tint}
+                                size={25}
+                            />
+                            <Text className="ml-2 text-lg font-bold text-black dark:text-white">
+                                See Interactions with Other Medications
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
                 <TouchableOpacity
                     className="absolute bottom-5 left-0 right-0 mx-5 bg-accent rounded-lg py-3.5 flex flex-row items-center justify-center z-50"
                     onPress={() => router.push("/(tabs)/saved")}

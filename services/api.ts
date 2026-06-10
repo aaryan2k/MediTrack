@@ -8,8 +8,9 @@ export const FDA_CONFIG = {
 }
 
 export const fetchFDA = async ({ query }: {query: string}) => {
+    const search = query ? `openfda.rxcui:${query}` : "";
     const endpoint = query
-        ? `${FDA_CONFIG.BASE_URL}?api_key=${FDA_CONFIG.API_KEY}&search=openfda.rxcui:${encodeURIComponent(query)}&limit=1`
+        ? `${FDA_CONFIG.BASE_URL}?api_key=${FDA_CONFIG.API_KEY}&search=${search}&limit=1`
         : `${FDA_CONFIG.BASE_URL}?api_key=${FDA_CONFIG.API_KEY}&limit=1`;
 
     const response = await fetch(endpoint, {

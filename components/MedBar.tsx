@@ -18,7 +18,7 @@ const MedBar = ({ id, name }: MedBarProps) => {
           <Ionicons
             name="medkit-outline"
             color={tint}
-            size={15}
+            size={20}
           />
           <Text className="ml-2 text-lg font-bold text-black dark:text-white">
             {name}
