@@ -126,7 +126,7 @@ export default function Search() {
                                 {
                                     !medicationsLoading && !medicationsError && searchQuery.trim()
                                     && medications.length > 0 && (
-                                    <Text className="text-xl text-white font-bold pb-4">
+                                    <Text className="text-xl text-black dark:text-white font-bold pb-4">
                                         Search Results for {''}
                                         <Text className="text-accent uppercase">{searchQuery}</Text>
                                     </Text>

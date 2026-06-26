@@ -1,5 +1,5 @@
 import { View, Text, useColorScheme, TouchableOpacity, ActivityIndicator, FlatList} from 'react-native'
-import { Link, router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from 'react';
 import { auth, db } from '../../../firebase/config';

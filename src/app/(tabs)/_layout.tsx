@@ -10,7 +10,7 @@ function TabIcon({ focused, icon, title }: any) {
     if (focused) {
         return (
             <View
-                className="flex w-full flex-1 min-w-[112px] min-h-[120px] mt-6 justify-center items-center overflow-hidden dark:bg-gray-900 bg-gray-200 
+                className="flex w-full flex-1 min-w-[112px] min-h-[120px] mt-6 justify-center items-center overflow-hidden dark:bg-zinc-800 bg-zinc-300 
                 border border-accent"
             >
                 <Ionicons name={icon} color={tint} size={20} className="mt-8" />
@@ -41,12 +41,12 @@ const _Layout = () => {
                     alignItems: 'center',
                 },
                 tabBarStyle: {
-                    backgroundColor: scheme === 'dark' ? '#1F2937' : '#F3F4F6',
+                    backgroundColor: scheme === 'dark' ? '#18181b' : '#e4e4e7',
                     height: 85,
                     position: 'absolute',
                     overflow: 'hidden',
                     borderWidth: 1,
-                    borderColor: scheme === 'dark' ? '#1F2937' : '#F3F4F6',
+                    borderColor: scheme === 'dark' ? '#18181b' : '#e4e4e7',
                 }
             }}
         >
