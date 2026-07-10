@@ -9,19 +9,21 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { timeOptions } from '../../../constants/timeOptions';
 
 const dayOptions = [
-  { label: "Sunday", value: "1" },
-  { label: "Monday", value: "2" },
-  { label: "Tuesday", value: "3" },
-  { label: "Wednesday", value: "4" },
-  { label: "Thursday", value: "5" },
-  { label: "Friday", value: "6" },
-  { label: "Saturday", value: "7" },
+  { label: "Sunday", value: "0" },
+  { label: "Monday", value: "1" },
+  { label: "Tuesday", value: "2" },
+  { label: "Wednesday", value: "3" },
+  { label: "Thursday", value: "4" },
+  { label: "Friday", value: "5" },
+  { label: "Saturday", value: "6" },
 ];
 
 const perDayOptions = [
   { label: "1x", value: "1" },
   { label: "2x", value: "2" },
   { label: "3x", value: "3" },
+  { label: "4x", value: "4" },
+  { label: "6x", value: "6" },
 //   { label: "Every X Hours", value: "4" },
 ];
 
