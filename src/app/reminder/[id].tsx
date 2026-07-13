@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth, db } from '../../../firebase/config';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import * as Notifications from 'expo-notifications';
 import { timeOptions } from '../../../constants/timeOptions';
 
 const dayOptions = [
@@ -32,12 +33,15 @@ const Reminder = () => {
     const scheme = useColorScheme();
     const tint = scheme === 'dark' ? '#fff' : '#000';
     const [name, setName] = useState("");
+    const [loading, setLoading] = useState(false);
     const [selectedDays, setSelectedDays] = useState<Array<string | number>>([]);
     const [daysLoading, setDaysLoading] = useState(false);
     const [selectedPerDay, setSelectedPerDay] = useState<Array<string | number>>([]);
     const [perDayLoading, setPerDayLoading] = useState(false);
     const [selectedTimes, setSelectedTimes] = useState<Array<string | number>>([]);
     const [timesLoading, setTimesLoading] = useState(false);
+    const [notisEnabled, setNotisEnabled] = useState<boolean | null | undefined>(undefined);
+    const [notiIDs, setNotiIDs] = useState<Array<string>>([]);
     const user = auth.currentUser;
 
     const handleSaveDays = async (nextValues: Array<string | number>) => {
@@ -70,7 +74,9 @@ const Reminder = () => {
             const medRef = doc(db, "Users", user.uid, "medications", String(id));
             await updateDoc(medRef, {
                 perDay: nextValues,
+                times: [],
             });
+            setSelectedTimes([]);
         } catch (error: any) {
             Alert.alert("Error", "Failed to save medication. Please try again.");
         } finally {
@@ -102,21 +108,103 @@ const Reminder = () => {
             if (!user) {
                 return;
             }
-            const medRef = doc(db, "Users", user.uid, "medications", String(id));
-            const snapshot = await getDoc(medRef);
-            if (snapshot.exists()) {
-                const data = snapshot.data();
-                setName(data.name);
-                setSelectedDays(data.days ? data.days : []);
-                setSelectedPerDay(data.perDay ? data.perDay : []);
-                setSelectedTimes(data.times ? data.times : []);
-            } else {
-                console.log("No such document!");
+            setLoading(true);
+            try {
+                const userRef = doc(db, "Users", user.uid);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    setNotisEnabled(userData.notisEnabled !== undefined ? userData.notisEnabled : null);
+                } else {
+                    console.log("No such document!");
+                }
+
+                const medRef = doc(db, "Users", user.uid, "medications", String(id));
+                const medSnap = await getDoc(medRef);
+                if (medSnap.exists()) {
+                    const medData = medSnap.data();
+                    setName(medData.name);
+                    setSelectedDays(medData.days ? medData.days : []);
+                    setSelectedPerDay(medData.perDay ? medData.perDay : []);
+                    setSelectedTimes(medData.times ? medData.times : []);
+                    setNotiIDs(medData.notiIDs ? medData.notiIDs : []);
+                } else {
+                    console.log("No such document!");
+                }
+            } catch (error) {
+                Alert.alert("Error", "Failed to load medication data. Please try again.");
+            } finally {
+                setLoading(false);
             }
         } 
         
         loadData();
-    }, [user])
+    }, [user]);
+
+    useEffect(() => {
+        const manageNotifications = async () => {
+            if (!user || loading || notisEnabled === undefined 
+                || selectedDays.length === 0 
+                || selectedPerDay.length === 0 
+                || selectedTimes.length === 0) {
+                return;
+            }
+
+            try {
+                if (notisEnabled === null) {
+                    const { status } = await Notifications.requestPermissionsAsync();
+                    const granted = status === "granted";
+                    setNotisEnabled(granted);
+                    await updateDoc(doc(db, "Users", user.uid), {
+                        notisEnabled: granted,
+                    });
+                    if (!granted) {
+                        return;
+                    }
+                }
+                if (notisEnabled === false) {
+                    return;
+                }
+
+                for (const id of notiIDs) {
+                    await Notifications.cancelScheduledNotificationAsync(id);
+                }
+
+                const newIds: string[] = [];
+
+                for (const day of selectedDays) {
+                    for (const time of selectedTimes) {
+                        const notificationId = await Notifications.scheduleNotificationAsync({
+                            content: {
+                                title: "Medication Reminder",
+                                body: `Time to take ${name}`,
+                                sound: true,
+                            },
+                            trigger: {
+                                type: "weekly",
+                                weekday: Number(day) + 1,
+                                hour: Number(time),
+                                minute: 0,
+                            } as Notifications.WeeklyTriggerInput,
+                        });
+
+                        newIds.push(notificationId);
+                    }
+                }
+
+                setNotiIDs(newIds);
+
+                await updateDoc(doc(db, "Users", user.uid, "medications", String(id)), {
+                    notificationIds: newIds,
+                });
+
+            } catch (error) {
+                Alert.alert("Error", "Failed to set notifications. Please try again.");
+            }
+        } 
+        
+        manageNotifications();
+    }, [notisEnabled, selectedDays, selectedPerDay, selectedTimes]);
 
     return (
          <View className="flex-1 bg-white dark:bg-black">
