@@ -185,13 +185,13 @@ const Reminder = () => {
                                 weekday: Number(day) + 1,
                                 hour: Number(time),
                                 minute: 0,
+                                repeats: true,
                             } as Notifications.WeeklyTriggerInput,
                         });
 
                         newIds.push(notificationId);
                     }
                 }
-
                 setNotiIDs(newIds);
 
                 await updateDoc(doc(db, "Users", user.uid, "medications", String(id)), {
