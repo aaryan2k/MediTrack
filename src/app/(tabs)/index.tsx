@@ -71,8 +71,8 @@ export default function Index() {
 
         setMedications(meds);
 
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+      } catch (error: any) {
+        console.error("Error fetching user data:", error.message);
       }
     };
 

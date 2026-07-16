@@ -27,11 +27,11 @@ export default function Search() {
     useEffect(() => {
         const timeoutId = setTimeout(async () => {
             if (searchQuery.trim()) {
-                await loadMedications()
+                await loadMedications();
             } else {
-                reset()
+                reset();
             }
-        }, 500)
+        }, 500);
 
         return () => clearTimeout(timeoutId);
     }, [searchQuery]);
@@ -79,8 +79,8 @@ export default function Search() {
                 });
             setSavedIds((prev) => [...prev, medicine.rxcui]);
             }
-        } catch (error) {
-            Alert.alert("Error", "Failed to save medication. Please try again.");
+        } catch (error: any) {
+            Alert.alert("Failed to Save Medications", error.message);
         }
     }
 

@@ -18,8 +18,8 @@ export interface DropdownOption {
 
 interface DropdownProps {
   options: DropdownOption[];
-  selectedValues: Array<string | number>;
-  onSave: (nextSelectedValues: Array<string | number>) => void;
+  selectedValues: (string | number)[];
+  onSave: (nextSelectedValues: (string | number)[]) => void;
   placeholder?: string;
   disabled?: boolean;
   label?: string;
@@ -38,7 +38,7 @@ export default function Dropdown({
   limit = options.length,
 }: DropdownProps) {
     const [open, setOpen] = useState(false);
-    const [saved, setSaved] = useState<Array<string | number>>([]);
+    const [saved, setSaved] = useState<(string | number)[]>([]);
     const scheme = useColorScheme();
     const tint = scheme === "dark" ? "#fff" : "#000";
 

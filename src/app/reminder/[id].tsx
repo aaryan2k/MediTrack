@@ -34,17 +34,17 @@ const Reminder = () => {
     const tint = scheme === 'dark' ? '#fff' : '#000';
     const [name, setName] = useState("");
     const [loading, setLoading] = useState(false);
-    const [selectedDays, setSelectedDays] = useState<Array<string | number>>([]);
+    const [selectedDays, setSelectedDays] = useState<(string | number)[]>([]);
     const [daysLoading, setDaysLoading] = useState(false);
-    const [selectedPerDay, setSelectedPerDay] = useState<Array<string | number>>([]);
+    const [selectedPerDay, setSelectedPerDay] = useState<(string | number)[]>([]);
     const [perDayLoading, setPerDayLoading] = useState(false);
-    const [selectedTimes, setSelectedTimes] = useState<Array<string | number>>([]);
+    const [selectedTimes, setSelectedTimes] = useState<(string | number)[]>([]);
     const [timesLoading, setTimesLoading] = useState(false);
     const [notisEnabled, setNotisEnabled] = useState<boolean | null | undefined>(undefined);
-    const [notiIDs, setNotiIDs] = useState<Array<string>>([]);
+    const [notiIDs, setNotiIDs] = useState<(string)[]>([]);
     const user = auth.currentUser;
 
-    const handleSaveDays = async (nextValues: Array<string | number>) => {
+    const handleSaveDays = async (nextValues: (string | number)[]) => {
         setDaysLoading(true);
         setSelectedDays(nextValues);
         if (!user) {
@@ -57,13 +57,13 @@ const Reminder = () => {
                 days: nextValues,
             });
         } catch (error: any) {
-            Alert.alert("Error", "Failed to save medication. Please try again.");
+            Alert.alert("Failed to save days. Please try again.", error.message);
         } finally {
             setDaysLoading(false);
         }
     };
 
-    const handleSavePerDay = async (nextValues: Array<string | number>) => {
+    const handleSavePerDay = async (nextValues: (string | number)[]) => {
         setPerDayLoading(true);
         setSelectedPerDay(nextValues);
         if (!user) {
@@ -78,13 +78,13 @@ const Reminder = () => {
             });
             setSelectedTimes([]);
         } catch (error: any) {
-            Alert.alert("Error", "Failed to save medication. Please try again.");
+            Alert.alert("Failed to save per-day frequency. Please try again.", error.message);
         } finally {
             setPerDayLoading(false);
         }
     };
 
-    const handleSaveTimes = async (nextValues: Array<string | number>) => {
+    const handleSaveTimes = async (nextValues: (string | number)[]) => {
         setTimesLoading(true);
         setSelectedTimes(nextValues);
         if (!user) {
@@ -97,7 +97,7 @@ const Reminder = () => {
                 times: nextValues,
             });
         } catch (error: any) {
-            Alert.alert("Error", "Failed to save medication. Please try again.");
+            Alert.alert("Failed to save times. Please try again.", error.message);
         } finally {
             setTimesLoading(false);
         }
@@ -131,15 +131,15 @@ const Reminder = () => {
                 } else {
                     console.log("No such document!");
                 }
-            } catch (error) {
-                Alert.alert("Error", "Failed to load medication data. Please try again.");
+            } catch (error: any) {
+                Alert.alert("Failed to load medication data. Please try again.", error.message);
             } finally {
                 setLoading(false);
             }
         } 
         
         loadData();
-    }, [user]);
+    }, [user, id]);
 
     useEffect(() => {
         const manageNotifications = async () => {
@@ -198,13 +198,13 @@ const Reminder = () => {
                     notificationIds: newIds,
                 });
 
-            } catch (error) {
-                Alert.alert("Error", "Failed to set notifications. Please try again.");
+            } catch (error: any) {
+                Alert.alert("Failed to set notifications. Please try again.", error.message);
             }
         } 
         
         manageNotifications();
-    }, [notisEnabled, selectedDays, selectedPerDay, selectedTimes]);
+    }, [user, id, loading, name, notiIDs, notisEnabled, selectedDays, selectedPerDay, selectedTimes]);
 
     return (
          <View className="flex-1 bg-white dark:bg-black">

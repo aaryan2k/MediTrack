@@ -1,7 +1,6 @@
-import {Text, View} from 'react-native';
+import {Text, View, useColorScheme} from 'react-native';
 import React from 'react';
 import {Tabs} from 'expo-router'
-import { useColorScheme } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 function TabIcon({ focused, icon, title }: any) {

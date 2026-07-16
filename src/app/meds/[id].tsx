@@ -34,7 +34,7 @@ const Details = () => {
         };
 
         load();
-    }, []);
+    }, [id]);
 
     const text = warningData?.results?.[0]?.warnings_and_cautions?.[0];
     let warnings = text ? [...text.matchAll(regex)].map(match => match[1].trim()) : [];
@@ -61,7 +61,7 @@ const Details = () => {
         } 
         
         loadData();
-    }, [user])
+    }, [user, id]);
 
     return (
         <View className="flex-1 bg-white dark:bg-black">

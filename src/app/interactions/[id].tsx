@@ -34,7 +34,7 @@ const Interactions = () => {
         };
 
         load();
-    }, []);
+    }, [id]);
 
     const text = interactionData?.results?.[0]?.drug_interactions_table?.[0];
     const interactions = text ? [...text.matchAll(regex)].map(match => match[1].trim()) : [];
@@ -57,7 +57,7 @@ const Interactions = () => {
           } 
           
           loadData();
-      }, [user])
+      }, [user, id]);
   
       return (
           <View className="flex-1 bg-white dark:bg-black">
@@ -117,7 +117,7 @@ const Interactions = () => {
                                               color="#ca8a04"
                                               className="mt-2"
                                           />
-                                          <Text className="text-xl font-bold text-yellow-600 ml-2">Don't Use With These Drugs:</Text>
+                                          <Text className="text-xl font-bold text-yellow-600 ml-2">Do Not Use With These Drugs:</Text>
                                       </View>
                                     )}
                                   </>
