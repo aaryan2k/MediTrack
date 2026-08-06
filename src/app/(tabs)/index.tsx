@@ -34,6 +34,11 @@ export default function Index() {
   const [displayDose, setDisplayDose] = useState<Date | null>(null);
   const [doseLabel, setDoseLabel] = useState<string>("");
   const [timeUntilNextDose, setTimeUntilNextDose] = useState<string>("");
+  const [visibleMonth, setVisibleMonth] = useState({
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
+  });
+  const [markedDates, setMarkedDates] = useState({});
   const scheme = useColorScheme();
   const tint = scheme === 'dark' ? '#fff' : '#000';
   const tintOpp = scheme === 'dark' ? '#000' : '#fff';
@@ -178,6 +183,49 @@ export default function Index() {
     checkDoseHistory();
   }, [user, prevDose, prevMedication]);
 
+  useEffect(() => {
+    const loadMarkedDates = async () => {
+      if (!user) return;
+
+      const year = visibleMonth.year;
+      const month = String(visibleMonth.month).padStart(2, "0");
+
+      const startDateString = `${year}-${month}-01`;
+      const endDay = new Date(year, visibleMonth.month, 0).getDate();
+      const endDateString = `${year}-${month}-${String(endDay).padStart(2, "0")}`;
+
+      try {
+        const q = query(
+          collection(db, "Users", user.uid, "doseHistory"),
+          where("status", "==", "taken"),
+          where("scheduledDate", ">=", startDateString),
+          where("scheduledDate", "<=", endDateString)
+        );
+
+        const snap = await getDocs(q);
+
+        const marks: Record<string, any> = {};
+
+        snap.forEach((docSnap) => {
+          const data = docSnap.data();
+          const date = data.scheduledDate;
+
+          if (!date) return;
+
+          marks[date] = {
+            dots: [{ key: "taken", color: "green" }],
+          };
+        });
+
+        setMarkedDates(marks);
+      } catch (error: any) {
+        console.error("Error loading marked dates:", error.message);
+      }
+    };
+
+    loadMarkedDates();
+  }, [user, visibleMonth]);
+
   if (user === undefined) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -266,6 +314,10 @@ export default function Index() {
     }
   };
 
+  const handleMonthChange = (day: { year: number; month: number }) => {
+    setVisibleMonth({ year: day.year, month: day.month });
+  };
+
   let disabled = 
     isSaving ||
     !displayMedication ||
@@ -277,11 +329,12 @@ export default function Index() {
      <View className="flex-1 bg-white dark:bg-black">
         <SafeAreaView className="flex-1">
             <Text className="text-black dark:text-white align-top mt-2 ml-4 font-bold text-4xl">Hello, {normalizeName(fname)}!</Text>
-            <View className="h-[2px] bg-gray-700 dark:bg-gray-300 mx-5 mb-5 mt-2" />
+            <View className="h-[2px] bg-gray-700 dark:bg-gray-300 mx-5 mt-2" />
             <ScrollView
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{
-                paddingBottom: 75
+                paddingBottom: 75,
+                marginTop: 5,
               }}
             >
               <View className="items-center mt-5 py-10">
@@ -324,9 +377,12 @@ export default function Index() {
                       calendarBackground: tintOpp,
                       dayTextColor: tint,
                       monthTextColor: tint,
-                      todayTextColor: "#007AFF",
-                      arrowColor: "#007AFF",
+                      todayTextColor: "#2FA3DC",
+                      arrowColor: "#2FA3DC",
                     }}
+                    onMonthChange={handleMonthChange}
+                    markingType="multi-dot"
+                    markedDates={markedDates}
                 />
               </View>
             </ScrollView>
