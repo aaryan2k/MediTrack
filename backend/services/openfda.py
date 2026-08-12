@@ -29,6 +29,7 @@ def parse_openfda_warnings(data) -> list[str]:
     warnings = re.findall(regex, text) if text else []
     if text:
         warnings[0] = warnings[0][25:].strip()
+        warnings = warnings[:-1]
     return warnings
 
 

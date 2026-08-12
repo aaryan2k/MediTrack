@@ -40,6 +40,7 @@ const Details = () => {
     let warnings = text ? [...text.matchAll(regex)].map(match => match[1].trim()) : [];
     if (text) {
         warnings[0] = warnings?.[0]?.slice(25)?.trim();
+        warnings = warnings.slice(0, -1);
     }
 
 
