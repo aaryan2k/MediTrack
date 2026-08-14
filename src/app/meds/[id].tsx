@@ -1,13 +1,11 @@
 import { View, Text, useColorScheme, TouchableOpacity, ActivityIndicator, FlatList} from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { auth, db } from '../../../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fetchFDA } from '../../../services/api';
-
-const regex = /([A-Z][A-Za-z0-9'’\- ]+(?:, [A-Z][A-Za-z0-9'’\- ]+)*(?: and [A-Z][A-Za-z0-9'’\- ]+)?)\s*:/g;
+import { getDrugInfo } from '../../../services/drugInfo';
 
 
 const Details = () => {
@@ -19,29 +17,30 @@ const Details = () => {
     const [warningData, setWarningData] = useState<null | any>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
-    
+    const loadingRef = useRef(false);
+
     useEffect(() => {
         const load = async () => {
+            if (loadingRef.current || !id || !name) return;
+
             try {
+                loadingRef.current = true;
                 setLoading(true);
-                const data = await fetchFDA({ query: String(id) });
+
+                const data = await getDrugInfo(id, name);
                 setWarningData(data);
             } catch (e) {
                 setError(e instanceof Error ? e : new Error("Failed to load"));
             } finally {
+                loadingRef.current = false;
                 setLoading(false);
             }
         };
 
         load();
-    }, [id]);
+    }, [id, name]);
 
-    const text = warningData?.results?.[0]?.warnings_and_cautions?.[0];
-    let warnings = text ? [...text.matchAll(regex)].map(match => match[1].trim()) : [];
-    if (text) {
-        warnings[0] = warnings?.[0]?.slice(25)?.trim();
-        warnings = warnings.slice(0, -1);
-    }
+    const warnings = warningData?.warnings ?? [];
 
 
 
@@ -119,10 +118,10 @@ const Details = () => {
                                             <Ionicons 
                                                 name="warning-outline"
                                                 size={25}
-                                                color="#ef4444"
+                                                color="#D40000"
                                                 className="mt-[0.25rem]"
                                             />
-                                            <Text className="text-2xl font-bold text-red-500 ml-2">Warnings:</Text>
+                                            <Text className="text-2xl font-bold text-warning ml-2">Warnings:</Text>
                                         </View>
                                     )}
                                 </>

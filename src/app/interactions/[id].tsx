@@ -2,12 +2,10 @@ import { View, Text, useColorScheme, TouchableOpacity, FlatList, ActivityIndicat
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { auth, db } from '../../../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
-import { fetchFDA } from '../../../services/api';
-
-const regex = /<content styleCode=\"bold\">([^<]+)</g;
+import { getDrugInfo } from '../../../services/drugInfo';
 
 
 const Interactions = () => {
@@ -19,45 +17,49 @@ const Interactions = () => {
     const [interactionData, setInteractionData] = useState<null | any>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
+    const loadingRef = useRef(false);
 
     useEffect(() => {
         const load = async () => {
+            if (loadingRef.current || !id || !name) return;
+
             try {
+                loadingRef.current = true;
                 setLoading(true);
-                const data = await fetchFDA({ query: String(id) });
+
+                const data = await getDrugInfo(id, name);
                 setInteractionData(data);
             } catch (e) {
                 setError(e instanceof Error ? e : new Error("Failed to load"));
             } finally {
+                loadingRef.current = false;
                 setLoading(false);
             }
         };
 
         load();
-    }, [id]);
-
-    const text = interactionData?.results?.[0]?.drug_interactions_table?.[0];
-    const interactions = text ? [...text.matchAll(regex)].map(match => match[1].trim()) : [];
-    interactions.shift(); // Remove the first match which is not an interaction
+    }, [id, name]);
+    
+    const interactions = interactionData?.interactions ?? [];
   
-      useEffect(() => {
-          const loadData = async () => {
-              if (!user) {
-                  router.push("/(auth)/login");
-                  return;
-              }
-              const medRef = doc(db, "Users", user.uid, "medications", String(id));
-              const snapshot = await getDoc(medRef);
-              if (snapshot.exists()) {
-                  const data = snapshot.data();
-                  setName(data.name);
-              } else {
-                  console.log("No such document!");
-              }
-          } 
+    useEffect(() => {
+        const loadData = async () => {
+            if (!user) {
+                router.push("/(auth)/login");
+                return;
+            }
+            const medRef = doc(db, "Users", user.uid, "medications", String(id));
+            const snapshot = await getDoc(medRef);
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+                setName(data.name);
+            } else {
+                console.log("No such document!");
+            }
+        } 
           
-          loadData();
-      }, [user, id]);
+        loadData();
+    }, [user, id]);
   
       return (
           <View className="flex-1 bg-white dark:bg-black">
@@ -114,10 +116,10 @@ const Interactions = () => {
                                           <Ionicons 
                                               name="information-circle-outline"
                                               size={25}
-                                              color="#ca8a04"
+                                              color="#D40000"
                                               className="mt-2"
                                           />
-                                          <Text className="text-xl font-bold text-yellow-600 ml-2">Do Not Use With These Drugs:</Text>
+                                          <Text className="text-xl font-bold text-warning ml-2">Harmful Interactions With:</Text>
                                       </View>
                                     )}
                                   </>

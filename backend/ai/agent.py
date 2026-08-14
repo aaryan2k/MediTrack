@@ -4,7 +4,7 @@ from langchain_core.messages import AIMessage, SystemMessage, HumanMessage
 
 class AgentState(TypedDict):
     rxcui: str
-    drugName: str
+    name: str
     warnings: list[str]
     warningSources: list[dict]
     interactions: list[str]
@@ -36,7 +36,7 @@ class Agent:
         # Otherwise → True
         result = state['llmResult']
         calls = state["toolCalls"]
-        if len(result.toolCalls) == 0:
+        if len(result.tool_calls) == 0:
             return False
         if calls >= 1:
             return False
@@ -47,7 +47,7 @@ class Agent:
     def call_llm(self, state: AgentState):
         # Send state/messages to Gemini
         rxcui = state['rxcui']
-        name = state['drugName']
+        name = state['name']
         warnings = state['warnings']
         warningSources = state['warningSources']
         interactions = state['interactions']
@@ -56,7 +56,7 @@ class Agent:
         messages = []
         if self.system:
             messages.append(SystemMessage(content=self.system))
-        hMessage = HumanMessage(content=f"Drug name: {name}\nRXCUI: {rxcui}\nWarnings: {warnings}\nWarning Sources: {warningSources}\nNegative Drug Interactions: {interactions}\nInteraction Sources: {interactionSources}\nTavily Results: {tavilyResults}")
+        hMessage = HumanMessage(content=f"Drug Name: {name}\nRXCUI: {rxcui}\nWarnings: {warnings}\nWarning Sources: {warningSources}\nNegative Drug Interactions: {interactions}\nInteraction Sources: {interactionSources}\nTavily Results: {tavilyResults}")
         messages.append(hMessage)
         message = self.model.invoke(messages)
         return {'llmResult': message}
