@@ -44,3 +44,5 @@ app-example
 /android
 
 .venv/
+
+__pycahche__/
