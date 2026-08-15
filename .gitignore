@@ -45,4 +45,4 @@ app-example
 
 .venv/
 
-__pycahche__/
+__pycache__/
