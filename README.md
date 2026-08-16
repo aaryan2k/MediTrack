@@ -1,56 +1,387 @@
-# Welcome to your Expo app 👋
+# 💊 MediTrack
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**MediTrack** is a medication management app built with React Native and Expo that helps users keep track of their medications, research drug information, and stay on top of their dosing schedules.
 
-## Get started
+The app combines **Firebase**, **OpenFDA**, **RxNorm**, and an **AI-powered research agent** built with **LangGraph and Gemini** to provide medication warnings and drug interaction information.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## ✨ Features
 
-2. Start the app
+### 💊 Medication Management
 
-   ```bash
-   npx expo start
-   ```
+* Search for medications using drug names or RxNorm identifiers
+* Save medications to your personal medication list
+* View detailed medication information
+* Remove medications from your saved list
+* Support for multiple medications
 
-In the output, you'll find options to open the app in a
+### ⏰ Medication Reminders
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+* Create customized medication schedules
+* Select specific days of the week
+* Configure multiple doses per day
+* View upcoming doses
+* Mark medications as taken
+* Track medication history
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 📅 Medication Calendar
 
-## Get a fresh project
+* View scheduled medications by day
+* Easily see upcoming doses
+* Visual indicators for days with scheduled medications
 
-When you're ready, run:
+### 🔎 Drug Information
 
-```bash
-npm run reset-project
+MediTrack retrieves medication information from multiple sources:
+
+1. **OpenFDA** — retrieves information directly from FDA drug labeling
+2. **RxNorm** — provides standardized medication identifiers
+3. **AI Research Agent** — fills in missing information using Gemini and Tavily
+4. **Firestore Cache** — stores previously retrieved drug information to avoid unnecessary API calls
+
+Drug information includes:
+
+* ⚠️ Warnings
+* 💊 Drug interactions
+* 🔗 Sources for retrieved information
+
+### 🤖 AI-Powered Research
+
+When OpenFDA doesn't provide complete information, MediTrack can use a LangGraph agent to research the medication.
+
+The agent:
+
+* Uses **Gemini** to determine what information is needed
+* Uses **Tavily** to search the web when necessary
+* Prioritizes authoritative medical sources
+* Returns structured medication information
+* Limits external research calls to avoid unnecessary API usage
+
+---
+
+## 🏗️ Architecture
+
+```text
+┌───────────────────────────────┐
+│       React Native App        │
+│          Expo Router          │
+└───────────────┬───────────────┘
+                │
+                ▼
+        ┌───────────────┐
+        │    Firebase   │
+        │   Firestore   │
+        └───────┬───────┘
+                │
+         Cache Miss
+                │
+                ▼
+┌───────────────────────────────┐
+│         FastAPI Backend       │
+├───────────────────────────────┤
+│                               │
+│  OpenFDA       LangGraph      │
+│     │             │           │
+│     │          Gemini         │
+│     │             │           │
+│     │          Tavily         │
+│     │             │           │
+└─────┴─────────────┴───────────┘
+                │
+                ▼
+        Structured Drug Info
+                │
+                ▼
+        Firestore Cache
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Drug Information Flow
 
-### Other setup steps
+```text
+User searches for medication
+            │
+            ▼
+     Check Firestore
+            │
+       ┌────┴────┐
+       │         │
+     Found     Not Found
+       │         │
+       │         ▼
+       │      OpenFDA
+       │         │
+       │    Complete?
+       │      ┌──┴──┐
+       │     Yes    No
+       │      │      │
+       │      │      ▼
+       │      │   Gemini
+       │      │      │
+       │      │   Tavily
+       │      │      │
+       └──────┴──────┘
+              │
+              ▼
+        Display Results
+              │
+              ▼
+       Cache in Firestore
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+---
 
-## Learn more
+## 🛠️ Tech Stack
 
-To learn more about developing your project with Expo, look at the following resources:
+### Frontend
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+* **React Native**
+* **Expo**
+* **Expo Router**
+* **TypeScript**
+* **NativeWind / Tailwind CSS**
 
-## Join the community
+### Backend
 
-Join our community of developers creating universal apps.
+* **Python**
+* **FastAPI**
+* **LangGraph**
+* **LangChain**
+* **Google Gemini**
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### APIs & Services
+
+* **Firebase Authentication**
+* **Cloud Firestore**
+* **RxNorm API**
+* **OpenFDA API**
+* **Tavily**
+
+### Data & ML
+
+* Structured drug information retrieval
+* AI-assisted web research
+* Cached medication information
+
+---
+
+## 📁 Project Structure
+
+```text
+medicine_app/
+│
+├── src/
+│   ├── app/
+│   │   ├── index.tsx
+│   │   ├── search/
+│   │   ├── saved/
+│   │   ├── profile/
+│   │   └── reminder/
+│   │
+│   ├── components/
+│   ├── services/
+│   │   ├── api.ts
+│   │   └── drugInfo.ts
+│   │
+│   └── firebase/
+│       └── config.ts
+│
+├── backend/
+│   ├── main.py
+│   └── ai/
+│       ├── agent.py
+│       └── model.py
+│
+├── package.json
+└── README.md
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Make sure you have installed:
+
+* Node.js
+* npm
+* Python 3
+* Expo CLI
+* A Firebase project
+* API keys for Gemini and Tavily
+
+### 1. Clone the repository
+
+```bash
+git clone <your-repository-url>
+cd medicine_app
+```
+
+### 2. Install frontend dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure Firebase
+
+Create your Firebase project and configure your Firebase credentials in:
+
+```text
+src/firebase/config.ts
+```
+
+Enable:
+
+* Firebase Authentication
+* Cloud Firestore
+
+### 4. Configure environment variables
+
+Create a `.env` file for the backend:
+
+```env
+GOOGLE_API_KEY=your_gemini_api_key
+TAVILY_API_KEY=your_tavily_api_key
+FDA_API_KEY=your_openfda_api_key
+```
+
+> **Never commit API keys or `.env` files to Git.**
+
+### 5. Install backend dependencies
+
+Navigate to the backend:
+
+```bash
+cd backend
+```
+
+Create and activate a virtual environment:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 6. Start the FastAPI server
+
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 7. Start the Expo app
+
+From the project root:
+
+```bash
+npx expo start
+```
+
+For iOS:
+
+```bash
+npx expo run:ios
+```
+
+---
+
+## 🔐 Security
+
+MediTrack uses Firebase Authentication to protect user-specific data.
+
+User-specific information is stored under:
+
+```text
+Users/
+└── {userId}/
+    ├── medications/
+    └── doseHistory/
+```
+
+Cached medication information is stored separately:
+
+```text
+DrugInfo/
+└── {rxcui}
+```
+
+API keys for Gemini, Tavily, and OpenFDA should remain on the backend and should **never be exposed in the client application**.
+
+---
+
+## 🧠 AI Research Agent
+
+The AI component is implemented using **LangGraph**.
+
+The agent receives medication information and determines whether additional research is necessary.
+
+```text
+Medication Information
+          │
+          ▼
+       Gemini
+          │
+     Need research?
+       ┌──┴──┐
+      No    Yes
+       │      │
+       │      ▼
+       │    Tavily
+       │      │
+       └──────┘
+          │
+          ▼
+   Structured DrugInfo
+```
+
+The agent is intentionally limited in how many external search calls it can make, helping reduce unnecessary API usage and preventing uncontrolled tool loops.
+
+---
+
+## 📊 Data Sources
+
+MediTrack uses several sources for medication information:
+
+| Source        | Purpose                                                  |
+| ------------- | -------------------------------------------------------- |
+| **RxNorm**    | Medication identification and RxCUI lookup               |
+| **OpenFDA**   | FDA drug labeling and safety information                 |
+| **Tavily**    | Web research when additional information is required     |
+| **Gemini**    | Research reasoning and structured information extraction |
+| **Firestore** | Cached medication information                            |
+
+---
+
+## ⚠️ Disclaimer
+
+MediTrack is an educational/software project and **is not a substitute for professional medical advice**.
+
+Medication information may be incomplete, outdated, or incorrectly interpreted. Users should consult a qualified healthcare professional before making decisions about medications or treatment.
+
+---
+
+## 🔮 Future Improvements
+
+* [ ] Push notifications for medication reminders
+* [ ] Improved dose history and adherence tracking
+* [ ] More robust drug interaction detection
+* [ ] Additional authoritative medical sources
+* [ ] Backend deployment
+* [ ] Improved AI source verification
+* [ ] Offline access to cached medication information
+* [ ] Personalized medication insights
+
+---
+
+## 👨‍💻 Built With
+
+Built as a full-stack project combining **React Native, Firebase, FastAPI, LangGraph, and Gemini** to explore mobile development, API integration, AI agents, and medication information retrieval.
+
+**MediTrack — making medication management simpler.** 💊
