@@ -6,6 +6,7 @@ import { auth, db } from '../../../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getDrugInfo } from '../../../services/drugInfo';
+import SourceModal from '../../../components/SourceModal';
 
 
 const Details = () => {
@@ -15,6 +16,7 @@ const Details = () => {
     const [name, setName] = useState("");
     const user = auth.currentUser;
     const [warningData, setWarningData] = useState<null | any>(null);
+    const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const loadingRef = useRef(false);
@@ -41,8 +43,12 @@ const Details = () => {
     }, [id, name]);
 
     const warnings = warningData?.warnings ?? [];
+    const warningSources = warningData?.warningSources ?? [];
 
 
+    const toggle = () => {
+        setOpen((prev) => !prev);
+    };
 
     useEffect(() => {
         const loadData = async () => {
@@ -114,14 +120,38 @@ const Details = () => {
                                     {
                                         !loading && !error
                                         && (
-                                        <View className="pb-4 mb-2 justify-center flex flex-row">
-                                            <Ionicons 
+                                        <View className="mb-2 flex-row items-center justify-between pb-4">
+                                            <View className="flex-row items-center">
+                                                <Ionicons
                                                 name="warning-outline"
                                                 size={25}
                                                 color="#D40000"
-                                                className="mt-[0.25rem]"
-                                            />
-                                            <Text className="text-2xl font-bold text-warning ml-2">Warnings:</Text>
+                                                />
+
+                                                <Text className="ml-2 text-2xl font-bold text-warning">
+                                                    Warnings:
+                                                </Text>
+                                            </View>
+
+                                            {warningSources.length > 0 && (
+                                                <TouchableOpacity
+                                                    onPress={toggle}
+                                                    className="flex-row items-center rounded-lg bg-accent px-3 py-2"
+                                                    activeOpacity={0.7}
+                                                    accessibilityRole="button"
+                                                    accessibilityLabel="View warning sources"
+                                                >
+                                                    <Ionicons
+                                                        name="link-outline"
+                                                        size={17}
+                                                        color={tint}
+                                                    />
+
+                                                    <Text className="ml-1.5 font-bold text-black dark:text-white">
+                                                        Sources
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            )}
                                         </View>
                                     )}
                                 </>
@@ -166,7 +196,12 @@ const Details = () => {
                     <Text className="text-black dark:text-white font-semibold text-base">Go Back</Text>
                 </TouchableOpacity>
             </SafeAreaView>
-        </View>
+            <SourceModal
+                options={warningSources}
+                open={open}
+                toggle={toggle}
+            />
+         </View>
     )
 }
 

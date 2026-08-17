@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { auth, db } from '../../../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
 import { getDrugInfo } from '../../../services/drugInfo';
+import SourceModal from '../../../components/SourceModal';
 
 
 const Interactions = () => {
@@ -16,6 +17,7 @@ const Interactions = () => {
     const user = auth.currentUser;
     const [interactionData, setInteractionData] = useState<null | any>(null);
     const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const loadingRef = useRef(false);
 
@@ -41,6 +43,12 @@ const Interactions = () => {
     }, [id, name]);
     
     const interactions = interactionData?.interactions ?? [];
+    const interactionSources = interactionData?.interactionSources ?? [];
+
+
+    const toggle = () => {
+        setOpen((prev) => !prev);
+    };
   
     useEffect(() => {
         const loadData = async () => {
@@ -112,15 +120,38 @@ const Interactions = () => {
                                     {
                                     !loading && !error
                                     && (
-                                      <View className="pb-4 mb-2 justify-center flex flex-row">
-                                          <Ionicons 
-                                              name="information-circle-outline"
-                                              size={25}
-                                              color="#D40000"
-                                              className="mt-2"
-                                          />
-                                          <Text className="text-xl font-bold text-warning ml-2">Harmful Interactions With:</Text>
-                                      </View>
+                                      <View className="mb-2 flex-row items-center justify-between gap-3 pb-4">
+                                            <View className="flex-1 flex-row items-center">
+                                                <Ionicons
+                                                    name="warning-outline"
+                                                    size={25}
+                                                    color="#D40000"
+                                                />
+
+                                                <Text className="ml-2 flex-1 shrink text-2xl font-bold text-warning">
+                                                    Avoid Taking With
+                                                </Text>
+                                            </View>
+
+                                            <TouchableOpacity
+                                                onPress={() => setOpen((previous) => !previous)}
+                                                className="shrink-0 flex-row items-center rounded-lg bg-accent px-3 py-2"
+                                                activeOpacity={0.7}
+                                            >
+                                                <Ionicons
+                                                    name="link-outline"
+                                                    size={17}
+                                                    color={tint}
+                                                />
+
+                                                <Text
+                                                    className="ml-1.5 font-bold text-black dark:text-white"
+                                                    numberOfLines={1}
+                                                    >
+                                                    Sources
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </View>
                                     )}
                                   </>
                               }
@@ -149,6 +180,11 @@ const Interactions = () => {
                       <Text className="text-black dark:text-white font-semibold text-base">Go Back</Text>
                   </TouchableOpacity>
               </SafeAreaView>
+              <SourceModal
+                    options={interactionSources}
+                    open={open}
+                    toggle={toggle}
+                />
           </View>
       )
   }
