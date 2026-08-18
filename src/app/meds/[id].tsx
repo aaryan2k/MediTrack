@@ -129,7 +129,7 @@ const Details = () => {
                                                 />
 
                                                 <Text className="ml-2 text-2xl font-bold text-warning">
-                                                    Warnings:
+                                                    Warnings
                                                 </Text>
                                             </View>
 

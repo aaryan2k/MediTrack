@@ -15,9 +15,19 @@ def get_fda_drug_info(rxcui: str):
 
     return {
         "warnings": warnings,
-        "warningSources": ["openFDA"] if warnings else [],
+        "warningSources": [
+            {
+                "title": "openFDA",
+                "url": "https://open.fda.gov/"
+            }
+        ] if warnings else [],
         "interactions": interactions,
-        "interactionSources": ["openFDA"] if interactions else []
+        "interactionSources": [
+            {
+                "title": "openFDA",
+                "url": "https://open.fda.gov/"
+            }
+        ] if interactions else []
     }
 
 @app.get("/llm-drug-info/{rxcui}")
